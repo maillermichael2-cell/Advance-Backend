@@ -210,3 +210,75 @@ py manage.py runserver
 ```
 
 Then use the JSON endpoints under `/api/auth/`.
+
+
+
+### 💾 Database Setup (Supabase Postgres)
+
+#### 1. Enable Database Extensions
+The properties application uses performance-optimized search indexes (`GinIndex`). You must activate the trigram matching operators directly inside your online Supabase instance before executing migrations:
+1. Navigate to your **Supabase Dashboard**.
+2. Go to **Database** (left sidebar) ➡️ **Extensions**.
+3. Search for **`pg_trgm`** and toggle it **ON**.
+
+#### 2. Get Your Connection String
+1. In your Supabase Dashboard, go to **Project Settings** ➡️ **Database**.
+2. Scroll down to the **Connection string** section and select **Direct**.
+3. Choose the **Transaction Pooler** toggle option.
+4. Copy the URI string. Ensure the string uses port **`6543`** to route through the connection pooler safely.
+
+#### 3. Configure Local Environment (`.env`)
+Create a `.env` file in your root directory (`/api/`) right next to `manage.py` and paste your connection string. 
+
+> ⚠️ **CRITICAL STRING ENCODING RULE:** If your Supabase password contains special characters (e.g., `!`, `@`, `:`, `#`), you **MUST** URL-encode them manually (`!` ➡️ `%21`, `@` ➡️ `%40`, `:` ➡️ `%3A`). Otherwise, Python's URL parser will throw a routing `ValueError`.
+
+```text
+DATABASE_URL=postgresql://postgres:YourEncodedPassword%21@://supabase.com
+```
+
+#### 4. Project Configuration (`core/settings.py`)
+Ensure your core application routes traffic through `django-environ` and `django.contrib.postgres` by verifying these settings properties are defined:
+
+```python
+INSTALLED_APPS = [
+    # ...
+    'django.contrib.postgres',  # Required for GinIndex & Trigram operations
+    # ...
+]
+
+# Database routing engine parsing the URL
+DATABASE_URL = env('DATABASE_URL', default=None)
+
+if DATABASE_URL:
+    url = urllib.parse.urlparse(DATABASE_URL)
+    db_name = url.path[1:].split('?')[0] if '?' in url.path else url.path[1:]
+
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': db_name,
+            'USER': url.username,
+            'PASSWORD': url.password,
+            'HOST': url.hostname,
+            'PORT': url.port or 5432,
+            'CONN_MAX_AGE': 600,  # Persists database connections up to 10 minutes
+            'OPTIONS': {
+                'sslmode': 'require',
+            },
+        }
+    }
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
+```
+
+#### 5. Execute Schema Sync
+Run the migration command in your local terminal to inject all authentication, account profile, and real estate listing tables directly into your production Supabase cluster:
+
+```bash
+python manage.py migrate
+```
