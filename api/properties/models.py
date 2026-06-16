@@ -1,4 +1,5 @@
 from django.db import models
+from django.db import connection
 from django.contrib.auth.models import User
 from django.contrib.postgres.indexes import GinIndex
 
@@ -66,10 +67,13 @@ class Property(models.Model):
         indexes = [
             models.Index(fields=['status', 'category', 'price']),
             models.Index(fields=['category', 'price']),
-
-            GinIndex(fields=['property_address'], name='property_address_trgm_idx', opclasses=['gin_trgm_ops']),
-            GinIndex(fields=['title'], name='property_title_trgm_idx', opclasses=['gin_trgm_ops'])
         ]
+
+        if connection.vendor == 'postgresql':
+            indexes += [
+                GinIndex(fields=['property_address'], name='property_address_trgm_idx', opclasses=['gin_trgm_ops']),
+                GinIndex(fields=['title'], name='property_title_trgm_idx', opclasses=['gin_trgm_ops']),
+            ]
 
 
 class Favorite(models.Model):
