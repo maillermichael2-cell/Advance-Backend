@@ -392,6 +392,52 @@ The `Profile` and `AgentProfile` models are registered in the Django admin.
 
 CORS settings are configured in `core/settings.py` using `django-cors-headers`.
 
+## Docker Setup (Recommended for Development)
+
+The project includes complete Docker configuration for easy setup and deployment.
+
+### Quick Start with Docker
+
+1. **Prerequisites:** Docker and Docker Compose installed
+
+2. **Build and Run:**
+   ```bash
+   cd /path/to/apigitfolder
+   docker-compose up --build
+   ```
+
+3. **Access the API:**
+   - API: http://localhost:8000/api/
+   - Swagger Docs: http://localhost:8000/api/docs/
+   - Admin Panel: http://localhost:8000/admin/ (login: admin/admin123)
+   - ReDoc: http://localhost:8000/api/redoc/
+
+4. **Stop Containers:**
+   ```bash
+   docker-compose down
+   ```
+
+### What Docker Provides
+
+- ✅ Isolated Python environment (no virtual env needed on host)
+- ✅ PostgreSQL database pre-configured
+- ✅ Automatic migrations on startup
+- ✅ Auto-created superuser (admin:admin123)
+- ✅ Hot-reload for code changes
+- ✅ All environment variables pre-configured
+
+### Docker Architecture
+
+The setup includes two containers:
+1. **Django API** (port 8000) - Runs your application
+2. **PostgreSQL** (port 5432) - Database server
+
+See [DOCKER.md](../DOCKER.md) for comprehensive Docker documentation including:
+- Advanced Docker commands
+- Troubleshooting
+- Production deployment
+- Performance optimization
+
 ## Running locally
 
 Start the Django server from the `api` folder:
