@@ -2,3 +2,5 @@
 .env.docker
 
 .env.compose
+
+.env
