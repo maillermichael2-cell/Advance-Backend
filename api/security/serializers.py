@@ -50,6 +50,32 @@ class AgentMetaSerializer(serializers.Serializer):
     years_of_experience = serializers.IntegerField(required=False, allow_null=True)
 
 
+class CompleteProfileSerializer(serializers.Serializer):
+    role = serializers.ChoiceField(choices=Profile.ROLE_CHOICES)
+    phone_number = serializers.CharField(required=False, allow_blank=True)
+
+    # Agent-only fields — required only if role == 'ESTATE AGENT'
+    license_number = serializers.CharField(required=False, allow_blank=True)
+    license_state_region = serializers.CharField(required=False, allow_blank=True)
+    agency_name = serializers.CharField(required=False, allow_blank=True)
+    agency_office_address = serializers.CharField(required=False, allow_blank=True)
+    job_title = serializers.CharField(required=False, allow_blank=True)
+    languages_spoken = serializers.ListField(required=False, default=list)
+    service_areas = serializers.ListField(required=False, default=list)
+    specialties = serializers.ListField(required=False, default=list)
+    preferred_lead_routing = serializers.ChoiceField(
+        choices=AgentProfile.PREFERRED_ROUTING_CHOICES, required=False, allow_blank=True
+    )
+    years_of_experience = serializers.IntegerField(required=False, allow_null=True)
+
+    def validate(self, data):
+        if data['role'] == 'ESTATE AGENT' and not data.get('license_number'):
+            raise serializers.ValidationError(
+                {'license_number': 'License number is required for estate agents.'}
+            )
+        return data
+
+
 # 3. ROOT REGISTRATION SERIALIZER
 class RegisterSerializer(serializers.Serializer):
     # Accept either a nested `user` object or top-level user fields

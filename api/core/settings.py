@@ -44,11 +44,16 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.postgres',
+    'django.contrib.sites',  # Required by django-allauth
     'corsheaders',
     'rest_framework',
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
     'drf_spectacular',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
     'properties',
     'security',
 ]
@@ -82,6 +87,7 @@ SIMPLE_JWT = {
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
+    'allauth.account.middleware.AccountMiddleware',  # Add this line for allauth
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -192,3 +198,47 @@ CORS_ALLOWED_ORIGINS = [
 
 # Allow cookies in CORS requests
 CORS_ALLOW_CREDENTIALS = True
+
+# Django Allauth Configuration
+SITE_ID = 1
+
+AUTHENTICATION_BACKENDS = [
+    # Needed to login by username in Django admin, regardless of `allauth`
+    'django.contrib.auth.backends.ModelBackend',
+    # `allauth` specific authentication methods, such as login by e-mail
+    'allauth.account.auth_backends.AuthenticationBackend',
+]
+
+# Modern django-allauth v64+ Login Configurations
+ACCOUNT_LOGIN_METHODS = {'email'}
+ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
+ACCOUNT_EMAIL_VERIFICATION = 'mandatory'  # Demands email activation loops
+
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'SCOPE': ['profile', 'email'],
+        'AUTH_PARAMS': {'access_type': 'online'},
+    }
+}
+LOGIN_REDIRECT_URL = '/api/auth/google/token/'  # Redirect here after Google OAuth flow completes
+
+
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Your API Documentation',
+    'DESCRIPTION': 'API description',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    
+    # Add this line to fix the Enum choice warnings:
+    'ENUM_NAME_OVERRIDES': {
+        'DeedOfAssignmentEnum': 'your_app.models.DeedOfAssignmentChoices', # Path to your actual choices class
+        'COfOEnum': 'your_app.models.COfOChoices',
+    },
+}
+
+
+# Frontend URL for OAuth redirects
+FRONTEND_URL = env('FRONTEND_URL', default='http://localhost:3000')
+# For Local Machine Testing: Outputs the registration emails directly into your server console logs
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'

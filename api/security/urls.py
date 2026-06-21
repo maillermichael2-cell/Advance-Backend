@@ -1,6 +1,6 @@
 from django.urls import path
 from rest_framework_simplejwt.views import TokenRefreshView, TokenBlacklistView
-from .views import RegisterView, CustomTokenObtainPairView
+from .views import RegisterView, CustomTokenObtainPairView, GoogleIssueTokenView, CompleteProfileView
 
 urlpatterns = [
     # Registration endpoint
@@ -14,6 +14,9 @@ urlpatterns = [
     
     # Logout (blacklist refresh token) — uses SimpleJWT's built-in view
     path('auth/logout/', TokenBlacklistView.as_view(), name='auth_logout'),
+    
+    path('auth/google/token/', GoogleIssueTokenView.as_view(), name='google_issue_token'),
+    path('auth/completeprofile/', CompleteProfileView.as_view(), name='complete_profile'),
 ]
 
 
