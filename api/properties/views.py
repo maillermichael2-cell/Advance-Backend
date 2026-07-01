@@ -80,7 +80,7 @@ class FavoriteRetrieveDestroyAPIView(generics.RetrieveDestroyAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        return Favorite.objects.all().select_related('property')
+        return Favorite.objects.filter(user=self.request.user).select_related('property')
 
 
 class PropertyImageListCreateAPIView(generics.ListCreateAPIView):

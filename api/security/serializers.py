@@ -38,14 +38,14 @@ class UserCreateSerializer(serializers.ModelSerializer):
 
 
 class AgentMetaSerializer(serializers.Serializer):
-    license_number = serializers.CharField(required=True)
+    license_number = serializers.CharField(required=False)
     license_state_region = serializers.CharField(required=False, allow_blank=True)
     agency_name = serializers.CharField(required=False, allow_blank=True)
     agency_office_address = serializers.CharField(required=False, allow_blank=True)
     job_title = serializers.CharField(required=False, allow_blank=True)
-    languages_spoken = serializers.ListField(child=serializers.CharField(), required=False, default=list)
-    service_areas = serializers.ListField(child=serializers.CharField(), required=False, default=list)
-    specialties = serializers.ListField(child=serializers.CharField(), required=False, default=list)
+    languages_spoken = serializers.CharField( required=False, default='Null')
+    service_areas = serializers.CharField( required=False, default='Null')
+    specialties = serializers.CharField( required=False, default='Null')
     preferred_lead_routing = serializers.ChoiceField(choices=AgentProfile.PREFERRED_ROUTING_CHOICES, required=False, allow_blank=True)
     years_of_experience = serializers.IntegerField(required=False, allow_null=True)
 
@@ -60,9 +60,9 @@ class CompleteProfileSerializer(serializers.Serializer):
     agency_name = serializers.CharField(required=False, allow_blank=True)
     agency_office_address = serializers.CharField(required=False, allow_blank=True)
     job_title = serializers.CharField(required=False, allow_blank=True)
-    languages_spoken = serializers.ListField(required=False, default=list)
-    service_areas = serializers.ListField(required=False, default=list)
-    specialties = serializers.ListField(required=False, default=list)
+    languages_spoken = serializers.CharField(required=False, default='Null')
+    service_areas = serializers.CharField(required=False, default='Null')
+    specialties = serializers.CharField(required=False, default='Null')
     preferred_lead_routing = serializers.ChoiceField(
         choices=AgentProfile.PREFERRED_ROUTING_CHOICES, required=False, allow_blank=True
     )
@@ -76,17 +76,19 @@ class CompleteProfileSerializer(serializers.Serializer):
         return data
 
 
+
+
 # 3. ROOT REGISTRATION SERIALIZER
 class RegisterSerializer(serializers.Serializer):
     # Accept either a nested `user` object or top-level user fields
     user = UserCreateSerializer(required=False)
-    # Top-level user fields (optional alternative to nested `user`)
-    username = serializers.CharField(required=False)
-    email = serializers.EmailField(required=False)
-    password = serializers.CharField(write_only=True, required=False, min_length=8)
+    # # Top-level user fields (optional alternative to nested `user`)
+    # username = serializers.CharField(required=False)
+    # email = serializers.EmailField(required=False)
+    # password = serializers.CharField(write_only=True, required=False, min_length=8)
     role = serializers.ChoiceField(choices=Profile.ROLE_CHOICES, required=True)
     phone_number = serializers.CharField(required=False, allow_blank=True)
-    agent_meta = AgentMetaSerializer(required=False)
+    
 
     def validate(self, attrs):
         role = attrs.get('role')
